@@ -1,2 +1,97 @@
 @import './common';
 
+body {
+    margin: 0px;
+    position: relative;
+    background-color: #f0f0f0;
+    font-size: 2%;
+    text-align: center;
+  }
+  .search-form {
+    padding: 7px 0px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+  }
+  .search-form input {
+    font-size: 18px;
+    padding-left: 5px;
+    margin-right: 5px;
+    border: transparent;
+    outline: transparent;
+  }
+  .search-form:hover.search-form input {
+    border: transparent;
+  }
+ 
+  .search-form button {
+    font-size: 18px;
+    border: 1px solid rgb(0, 102, 255);
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: rgb(0, 102, 255);
+    color: #f0f0f0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    padding: 5px;
+  }
+  img {
+    display: inline-block;
+    margin: 0;
+    padding: 0px;
+    width: auto;
+    height: 200px;
+  }
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 15px;
+
+  }
+  .photo-card {
+    margin-right: 15px;
+    margin-bottom: 15px;
+    flex-basis: calc((100% - 30px) / 3);
+  }
+  .photo-card:last-child {
+    margin-bottom: 0px;
+    margin-right: 0px;
+  }
+  .gallery_link {
+    flex-grow: 1;
+  }
+  
+  .gallery__image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    cursor: zoom-in;
+  }
+  .info {
+    font-size: 1.1rem;
+    display: flex;
+    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    padding: 0 5px;
+  }
+  .info-item {
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .load-more {
+    font-size: 18px;
+    border: 1px solid rgb(0, 102, 255);
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: rgb(0, 102, 255);
+    color: #f0f0f0;
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+  }
