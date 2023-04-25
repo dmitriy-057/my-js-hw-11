@@ -7,6 +7,9 @@ const BASE_URL = "https://pixabay.com/api/";
 let page = 1;
 
 let getGallery;
+// let galleryData = [];
+let images = [];
+
 
 
 const refs = {
@@ -28,19 +31,24 @@ function fetchPictures(name) {
           throw new Error()
       }
       return response.json()
-  }
-  )
-  .then(data=> {
+  })
+  .then(data => {
       console.log('data',data);
       return data;
   })
+
 }
 
 function onLoadMoreBtnClick(e) {
   e.preventDefault();
   page += 1;
   fetchPictures()
-
+  .then(data => {
+    console.log('data', data);
+    markupGallery.push(data.hits)
+    createGalleryMarkup(images)
+ 
+  })
 }
 
 function onSearchBtn(e) {
@@ -48,8 +56,8 @@ function onSearchBtn(e) {
     console.log('input value', refs.input.value);
     getGallery = refs.input.value;
     fetchPictures(getGallery)
-    .then(images => {
-      createGalleryMarkup(images.hits)
+    .then(data => {
+      createGalleryMarkup(data.hits)
     })
     .catch(error => {
       console.log(error)
