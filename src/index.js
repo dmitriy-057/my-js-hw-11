@@ -45,7 +45,7 @@ function onLoadMoreBtnClick(e) {
   fetchPictures()
   .then(data => {
     console.log('data', data);
-    markupGallery.push(data.hits)
+    images.push(data.hits)
     createGalleryMarkup(images)
  
   })
