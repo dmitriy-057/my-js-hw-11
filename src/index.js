@@ -9,8 +9,8 @@ let lightbox = new SimpleLightbox('.gallery a');
 const API_KEY = "29210870-5c756012ce316252fd55732c8";
 const BASE_URL = "https://pixabay.com/api/";
 let page = 1;
-let getGallery;
-let images = [];
+// let getGallery;
+let galleryData = [];
 
 
 
@@ -26,44 +26,56 @@ refs.loadMoreBtn.style.display = "none";
 refs.form.addEventListener("submit", onSearchBtn);
 refs.loadMoreBtn.addEventListener('click', onLoadMoreBtnClick);
 
-function fetchPictures(name) {
+async function fetchPictures(queryName) {
 
   if(getGallery === "") {
     errorMessage()
     return;
   }
-  
-  return fetch(`${BASE_URL}?key=${API_KEY}&q=${name}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
-  .then(response => {
-      if(!response.ok) {
-          throw new Error()
-      }
-      return response.json()
-  })
-  .then(data => {
-      console.log('data',data);
-      refs.loadMoreBtn.style.display = "block";
-      return data;
-  })
-}
+  console.log('page', page);
+  try {
+    let response = await fetch(`${BASE_URL}?key=${API_KEY}&q=${queryName}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
+    refs.loadMoreBtn.style.display = "block";
+
+    const data = await response.json();
+    console.log('data', data);
+    
+    if(data.totalHits === galleryData.length) {
+      refs.loadMoreBtn.style.display = "none";
+      return Notify.failure("Больше нет картинок по Вашему запросу")
+      
+    }
+    galleryData = [...galleryData,...data.hits];
+    return galleryData;
+    
+  } catch (error) {
+    console.log(error)
+  }
+
+} 
 
 function onLoadMoreBtnClick(e) {
   e.preventDefault();
+  console.log('input value', refs.input.value);
+  console.log('getGallery', getGallery);
   page += 1;
-  fetchPictures()
+  fetchPictures(refs.input.value)
   .then(newData => {
     console.log('newData', newData);
-    createGalleryMarkup(newData.hits)
+    createGalleryMarkup(newData)
   })
 }
 
 function onSearchBtn(e) {
+    galleryData = [];
+    page = 1;
     e.preventDefault();
     console.log('input value', refs.input.value);
     getGallery = refs.input.value;
+
     fetchPictures(getGallery)
     .then(data => {
-      createGalleryMarkup(data.hits)
+      createGalleryMarkup(data)
     })
     .catch(error => {
       console.log(error)
@@ -101,9 +113,9 @@ function createGalleryMarkup(images) {
     })
     .join('')
 
-  refs.gallery.insertAdjacentHTML('beforeend', markupGallery);
+  refs.gallery.innerHTML = markupGallery;
   lightbox.refresh();
-  refs.input.value = "";
+  // refs.input.value = "";
 }
 
 
