@@ -9,8 +9,8 @@ let lightbox = new SimpleLightbox('.gallery a');
 const API_KEY = "29210870-5c756012ce316252fd55732c8";
 const BASE_URL = "https://pixabay.com/api/";
 let page = 1;
-// let getGallery;
-let galleryData = [];
+let getGallery;
+// let galleryData = [];
 
 
 
@@ -25,63 +25,74 @@ const refs = {
 refs.loadMoreBtn.style.display = "none";
 refs.form.addEventListener("submit", onSearchBtn);
 refs.loadMoreBtn.addEventListener('click', onLoadMoreBtnClick);
+refs.loadMoreBtn.style.display = "none";
 
-async function fetchPictures(queryName) {
-
-  if(getGallery === "") {
-    errorMessage()
-    return;
-  }
-  console.log('page', page);
-  try {
-    let response = await fetch(`${BASE_URL}?key=${API_KEY}&q=${queryName}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
-    refs.loadMoreBtn.style.display = "block";
-
-    const data = await response.json();
-    console.log('data', data);
-    
-    if(data.totalHits === galleryData.length) {
-      refs.loadMoreBtn.style.display = "none";
-      return Notify.failure("Больше нет картинок по Вашему запросу")
-      
-    }
-    galleryData = [...galleryData,...data.hits];
-    return galleryData;
-    
-  } catch (error) {
-    console.log(error)
-  }
-
-} 
+function onSearchBtn(e) {
+    e.preventDefault();
+    // galleryData = [];
+    page = 1;
+    getGallery = refs.input.value;
+    console.log('getGallery', getGallery);
+    fetchPictures(getGallery)
+}
 
 function onLoadMoreBtnClick(e) {
   e.preventDefault();
-  console.log('input value', refs.input.value);
   console.log('getGallery', getGallery);
   page += 1;
-  fetchPictures(refs.input.value)
-  .then(newData => {
-    console.log('newData', newData);
-    createGalleryMarkup(newData)
-  })
+  fetchPictures(getGallery)
+  // .then(newData => {
+  //   console.log('newData', newData);
+  //   createGalleryMarkup(newData)
+  // })
 }
 
-function onSearchBtn(e) {
-    galleryData = [];
-    page = 1;
-    e.preventDefault();
-    console.log('input value', refs.input.value);
-    getGallery = refs.input.value;
+async function fetchPictures(queryName) {
+  console.log('page', page);
+  try {
+    if(getGallery !== "") {
+  let response = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${queryName}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
 
-    fetchPictures(getGallery)
-    .then(data => {
-      createGalleryMarkup(data)
-    })
-    .catch(error => {
-      console.log(error)
-    });
+      createGalleryMarkup(response.data.hits);
+      if (!response.data.hits.length) {
+        Notify.failure("Больше нет картинок по Вашему запросу")
+        refs.loadMoreBtn.style.display = "none";
+      }else{
+        refs.loadMoreBtn.style.display = "block";
+      }
+    }else{
+      errorMessage()
+      refs.loadMoreBtn.style.display = "none";
+    }
+    
+  } 
+  
+  catch {
+    console.log(error);
+};
 
-}
+  // try {
+  //   if(getGallery !== "") {
+  //     let response = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${queryName}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
+  //     createGalleryMarkup(response.data.hits);
+
+  //       if(!response.data.hits.length) {
+  //       Notify.failure("Больше нет картинок по Вашему запросу")
+  //       refs.loadMoreBtn.style.display = "none";   
+  //     } else {
+  //       refs.loadMoreBtn.style.display = "block";
+  //     }
+  //   } else {
+  //     errorMessage();
+  //     refs.loadMoreBtn.style.display = "none"; 
+  //   }
+    
+  // } catch (error) {
+  //   console.log(error)
+  // }
+
+} 
+
 
 function createGalleryMarkup(images) {
     const markupGallery = images.map(({webformatURL,largeImageURL,tags,likes,views,comments,downloads}) => {
@@ -113,13 +124,12 @@ function createGalleryMarkup(images) {
     })
     .join('')
 
-  refs.gallery.innerHTML = markupGallery;
+  refs.gallery.insertAdjacentHTML('beforeend', markupGallery);
   lightbox.refresh();
   // refs.input.value = "";
 }
 
 
 function errorMessage() {
-  Notify.failure("Sorry, there are no images matching your search query. Please try again.")
-  
+  Notify.failure("Извините, нет изображений, соответствующих вашему поисковому запросу. Пожалуйста, попробуйте еще раз.")
 }
