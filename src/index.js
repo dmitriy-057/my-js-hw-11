@@ -1,4 +1,3 @@
-// import { fetchPictures } from "./fetchPictures";
 import axios from "axios";
 import {Notify} from "notiflix";
 import SimpleLightbox from "simplelightbox";
@@ -10,8 +9,7 @@ const API_KEY = "29210870-5c756012ce316252fd55732c8";
 const BASE_URL = "https://pixabay.com/api/";
 let page = 1;
 let getGallery;
-// let galleryData = [];
-
+let galleryData;
 
 
 const refs = {
@@ -27,71 +25,41 @@ refs.form.addEventListener("submit", onSearchBtn);
 refs.loadMoreBtn.addEventListener('click', onLoadMoreBtnClick);
 refs.loadMoreBtn.style.display = "none";
 
-function onSearchBtn(e) {
-    e.preventDefault();
-    // galleryData = [];
-    page = 1;
-    getGallery = refs.input.value;
-    console.log('getGallery', getGallery);
-    fetchPictures(getGallery)
-}
-
-function onLoadMoreBtnClick(e) {
-  e.preventDefault();
-  console.log('getGallery', getGallery);
-  page += 1;
-  fetchPictures(getGallery)
-  // .then(newData => {
-  //   console.log('newData', newData);
-  //   createGalleryMarkup(newData)
-  // })
-}
-
-async function fetchPictures(queryName) {
-  console.log('page', page);
+async function fetchPictures() {
   try {
     if(getGallery !== "") {
-  let response = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${queryName}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
-
-      createGalleryMarkup(response.data.hits);
-      if (!response.data.hits.length) {
-        Notify.failure("Больше нет картинок по Вашему запросу")
-        refs.loadMoreBtn.style.display = "none";
-      }else{
-        refs.loadMoreBtn.style.display = "block";
-      }
-    }else{
-      errorMessage()
-      refs.loadMoreBtn.style.display = "none";
+      let response = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${refs.input.value}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`);
+      galleryData = response.data.hits;
+      console.log('galleryData', galleryData);
+      createGalleryMarkup(galleryData);
+      refs.loadMoreBtn.style.display = "block";
+    } else {
+      Notify.failure("Извините, нет изображений, соответствующих вашему поисковому запросу. Пожалуйста, попробуйте еще раз.");
     }
-    
-  } 
-  
-  catch {
+  } catch(error) {
     console.log(error);
-};
+    Notify.failure("Извините, больше нет картинок по Вашему запросу.");
+    refs.loadMoreBtn.style.display = "none";
+  }
+}
 
-  // try {
-  //   if(getGallery !== "") {
-  //     let response = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${queryName}&image-type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`)
-  //     createGalleryMarkup(response.data.hits);
+function onSearchBtn(e) {
+  e.preventDefault();
+  page = 12;
+  getGallery = refs.input.value;
+  if(getGallery) {
+    refs.gallery.innerHTML = "";
+  }
+  fetchPictures();
+}
 
-  //       if(!response.data.hits.length) {
-  //       Notify.failure("Больше нет картинок по Вашему запросу")
-  //       refs.loadMoreBtn.style.display = "none";   
-  //     } else {
-  //       refs.loadMoreBtn.style.display = "block";
-  //     }
-  //   } else {
-  //     errorMessage();
-  //     refs.loadMoreBtn.style.display = "none"; 
-  //   }
-    
-  // } catch (error) {
-  //   console.log(error)
-  // }
+function onLoadMoreBtnClick() {
+  page += 1;
+  fetchPictures();
+}
 
-} 
+
+
 
 
 function createGalleryMarkup(images) {
@@ -126,10 +94,5 @@ function createGalleryMarkup(images) {
 
   refs.gallery.insertAdjacentHTML('beforeend', markupGallery);
   lightbox.refresh();
-  // refs.input.value = "";
 }
 
-
-function errorMessage() {
-  Notify.failure("Извините, нет изображений, соответствующих вашему поисковому запросу. Пожалуйста, попробуйте еще раз.")
-}
